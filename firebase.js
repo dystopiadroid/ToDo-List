@@ -1,5 +1,7 @@
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js'
-import {getFirestore, collection, addDoc} from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js'
+import { getFirestore, addDoc, collection } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyAdPf4lB-kLarNpch0FOymdPyO27ErtPtI",
   authDomain: "todo-list-adeca.firebaseapp.com",
@@ -10,19 +12,16 @@ const firebaseConfig = {
   measurementId: "G-9W0HWQVTNJ"
 };
 
-const firebaseApp = initializeApp(firebaseConfig)
-const db = getFirestore(firebaseApp)
+const app = initializeApp(firebaseConfig)
+const db = getFirestore(app)
 
-const itemList = collection(db, "items-list")
-
+let todo = document.getElementById('create-todo-input')
 window.addTodo = async (event) => {
   event.preventDefault()
-  let todo = document.getElementById('create-todo-input').value;
-    
-  const docPosted = await addDoc(itemList, {
-        status : "active",
-        todo
-    })
-
-  console.log({docPosted})
+  todo = document.getElementById('create-todo-input')
+  await addDoc(collection(db, 'items-list'), {
+    status: "active",
+    text: todo.value
+  })
+  todo.value = ""
 }
