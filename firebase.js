@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js'
-import { getFirestore, addDoc, collection } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
+import { getFirestore, addDoc, collection, doc, onSnapshot, query } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
 
 
 const firebaseConfig = {
@@ -16,12 +16,49 @@ const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 
 let todo = document.getElementById('create-todo-input')
-window.addTodo = async (event) => {
+
+window.addTodo = (event) => {
   event.preventDefault()
   todo = document.getElementById('create-todo-input')
-  await addDoc(collection(db, 'items-list'), {
+  addDoc(collection(db, 'items-list'), {
     status: "active",
     text: todo.value
   })
   todo.value = ""
 }
+
+function getItems() {
+  const q = query(collection(db, 'items-list'))
+  let items = []
+  const allDocs = onSnapshot(q, (querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      items.push({
+        id: doc.id,
+        ...doc.data()   //spread syntax
+      })
+    })
+    generateItems(items)
+  })
+}
+
+function generateItems(items) {
+  let itemHTML = ""
+
+  items.forEach((item) => {
+    itemHTML += `
+      <div class="todo-item">
+          <div class="check">
+                <div class="check-mark">
+                    <img src="./assets/icon-check.svg" alt="">
+                </div>
+          </div>
+          <div class="todo-text">
+                ${item.text}
+          </div>
+      </div>
+`
+  })
+  document.querySelector('.todo-items').innerHTML = itemHTML
+}
+
+getItems()
