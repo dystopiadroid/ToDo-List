@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js'
-import { getFirestore, addDoc, collection, doc, onSnapshot, query } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
+import { getFirestore, addDoc, collection, doc, onSnapshot, query, updateDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
 
 
 const firebaseConfig = {
@@ -29,8 +29,8 @@ window.addTodo = (event) => {
 
 function getItems() {
   const q = query(collection(db, 'items-list'))
-  let items = []
   const allDocs = onSnapshot(q, (querySnapshot) => {
+  let items = []
     querySnapshot.forEach((doc) => {
       items.push({
         id: doc.id,
@@ -48,17 +48,43 @@ function generateItems(items) {
     itemHTML += `
       <div class="todo-item">
           <div class="check">
-                <div class="check-mark">
+                <div data-id="${item.id}" class="check-mark ${item.status == "Completed" ? "checked" : ""}">
                     <img src="./assets/icon-check.svg" alt="">
                 </div>
           </div>
-          <div class="todo-text">
+          <div class="todo-text ${item.status == "Completed" ? "checked" : ""}">
                 ${item.text}
           </div>
       </div>
 `
   })
   document.querySelector('.todo-items').innerHTML = itemHTML
+  createEventListeners()
 }
+
+function createEventListeners() {
+  let todoCheckMarks = document.querySelectorAll('.todo-item .check-mark')
+  todoCheckMarks.forEach((checkMark) => {
+    checkMark.addEventListener('click', () => {
+      markCompleted(checkMark.dataset.id)
+    })
+  })
+}
+
+async function markCompleted(id) {
+  const refDoc = doc(db, 'items-list', id)
+  const snapDoc = await getDoc(refDoc)
+  
+    if (snapDoc.data().status == 'active') {
+      updateDoc(refDoc, {
+        status: 'Completed'
+      })
+    }
+    else if (snapDoc.data().status == 'Completed') {
+      updateDoc(refDoc, {
+        status: 'active'
+      })
+    }
+  }
 
 getItems()
