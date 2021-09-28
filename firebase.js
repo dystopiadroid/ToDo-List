@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js'
-import { getFirestore, addDoc, collection, doc, onSnapshot, query, updateDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
+import { getFirestore, addDoc, collection, doc, onSnapshot, query, updateDoc, getDoc, where, deleteDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
 
 
 const firebaseConfig = {
@@ -38,15 +38,15 @@ function getItems() {
         ...doc.data()   //spread syntax
       })
     })
-    
-    generateItems(items.filter((item)=>{
-      if(activeClass == 'All'){
+
+    generateItems(items.filter((item) => {
+      if (activeClass == 'All') {
         return item
       }
-      else if(activeClass == 'Active'){
-        return item.status != 'Completed' 
+      else if (activeClass == 'Active') {
+        return item.status != 'Completed'
       }
-      else if(activeClass == 'Completed'){
+      else if (activeClass == 'Completed') {
         return item.status != 'active'
       }
     }))
@@ -109,17 +109,27 @@ const tabs = {
   'compTab': document.getElementById('compTab')
 }
 
-Object.values(tabs).map((tab)=>{
-  tab.addEventListener('click',(e)=>{
+Object.values(tabs).map((tab) => {
+  tab.addEventListener('click', (e) => {
     const currentTab = e.target
-    Object.values(tabs).map((ele)=>{
-      if(currentTab === ele){
+    Object.values(tabs).map((ele) => {
+      if (currentTab === ele) {
         currentTab.classList.add('active')
         getItems()
       }
-      else{
+      else {
         ele.classList.remove('active')
       }
     })
+  })
+})
+
+const clearComp = document.getElementById('clearComp')
+
+clearComp.addEventListener('click', async (e) => {
+  const q = query(collection(db, 'items-list'), where("status", "==", "Completed"))
+  const querySnapshot = await getDocs(q)
+  querySnapshot.forEach(async (docs) => {
+    await deleteDoc(doc(db,'items-list',docs.id))
   })
 })
