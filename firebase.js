@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js'
-import { getFirestore, addDoc, collection, doc, onSnapshot, query, updateDoc, getDoc, where, deleteDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
+import { getFirestore, addDoc, collection, doc, onSnapshot, query, updateDoc, getDoc, where, deleteDoc, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js'
 
 
 const firebaseConfig = {
@@ -22,7 +22,8 @@ window.addTodo = (event) => {
   todo = document.getElementById('create-todo-input')
   addDoc(collection(db, 'items-list'), {
     status: "active",
-    text: todo.value
+    text: todo.value,
+    timeStamp : serverTimestamp()
   })
   todo.value = ""
 }
