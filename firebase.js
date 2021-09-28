@@ -31,37 +31,25 @@ function getItems() {
   const q = query(collection(db, 'items-list'))
   const allDocs = onSnapshot(q, (querySnapshot) => {
     let items = []
-    let itemsActive = []
-    let itemsCompleted = []
     let activeClass = document.querySelector('.active').innerHTML
     querySnapshot.forEach((doc) => {
       items.push({
         id: doc.id,
         ...doc.data()   //spread syntax
       })
-      if (doc.data().status == 'Completed') {
-        itemsCompleted.push({
-          id: doc.id,
-          ...doc.data()   //spread syntax
-        })
-      }
-      else if (doc.data().status == 'active') {
-        itemsActive.push({
-          id: doc.id,
-          ...doc.data()   //spread syntax
-        })
-      }
-
     })
-    if (activeClass == 'All') {
-      generateItems(items)
-    }
-    else if (activeClass == 'Active') {
-      generateActiveItems(itemsActive)
-    }
-    else {
-      generateCompletedItems(itemsCompleted)
-    }
+    
+    generateItems(items.filter((item)=>{
+      if(activeClass == 'All'){
+        return item
+      }
+      else if(activeClass == 'Active'){
+        return item.status != 'Completed' 
+      }
+      else if(activeClass == 'Completed'){
+        return item.status != 'active'
+      }
+    }))
   })
 }
 
@@ -84,46 +72,6 @@ function generateItems(items) {
   })
   document.querySelector('.todo-items').innerHTML = itemHTML
   createEventListeners()
-}
-
-function generateActiveItems(itemsActive) {
-  let itemHTML = ""
-
-  itemsActive.forEach((item) => {
-    itemHTML += `
-      <div class="todo-item">
-          <div class="check">
-                <div data-id="${item.id}" class="check-mark ${item.status == "Completed" ? "checked" : ""}">
-                    <img src="./assets/icon-check.svg" alt="">
-                </div>
-          </div>
-          <div class="todo-text ${item.status == "Completed" ? "checked" : ""}">
-                ${item.text}
-          </div>
-      </div>
-`
-  })
-  document.querySelector('.todo-items').innerHTML = itemHTML
-}
-
-function generateCompletedItems(itemsCompleted) {
-  let itemHTML = ""
-
-  itemsCompleted.forEach((item) => {
-    itemHTML += `
-      <div class="todo-item">
-          <div class="check">
-                <div data-id="${item.id}" class="check-mark ${item.status == "Completed" ? "checked" : ""}">
-                    <img src="./assets/icon-check.svg" alt="">
-                </div>
-          </div>
-          <div class="todo-text ${item.status == "Completed" ? "checked" : ""}">
-                ${item.text}
-          </div>
-      </div>
-`
-  })
-  document.querySelector('.todo-items').innerHTML = itemHTML
 }
 
 function createEventListeners() {
@@ -154,26 +102,24 @@ async function markCompleted(id) {
 
 getItems()
 
-let act = document.querySelector('.items-status .Act')
-let comp = document.querySelector('.items-status .Comp')
-let itemsStatus = document.querySelector('.items-status')
-act.addEventListener('click', () => {
-  itemsStatus.innerHTML = `
-          <span class="all">All</span>
-          <span class="Act active">Active</span>
-          <span class="Comp">Completed</span>
-`
-console.log(itemsStatus)
-getItems()
-})
 
-comp.addEventListener('click', () => {
-  itemsStatus.innerHTML = `
-          <span class="all">All</span>
-          <span class="Act">Active</span>
-          <span class="Comp active">Completed</span>
-`
-console.log(itemsStatus)
-getItems()
-})
+const tabs = {
+  'allTab': document.getElementById('allTab'),
+  'actTab': document.getElementById('actTab'),
+  'compTab': document.getElementById('compTab')
+}
 
+Object.values(tabs).map((tab)=>{
+  tab.addEventListener('click',(e)=>{
+    const currentTab = e.target
+    Object.values(tabs).map((ele)=>{
+      if(currentTab === ele){
+        currentTab.classList.add('active')
+        getItems()
+      }
+      else{
+        ele.classList.remove('active')
+      }
+    })
+  })
+})
