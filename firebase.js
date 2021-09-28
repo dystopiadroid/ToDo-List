@@ -50,7 +50,20 @@ function getItems() {
         return item.status != 'active'
       }
     }))
+
+    let len = []
+    items.filter((item) => {
+      if (item.status != 'Completed') {
+        len.push(item)
+      }
+    })
+    itemsLeft(len)
   })
+}
+
+function itemsLeft(itemslen) {
+  let itemsLeft = document.querySelector('.items-left')
+  itemsLeft.innerHTML = `${itemslen.length} items left`
 }
 
 function generateItems(items) {
@@ -130,6 +143,6 @@ clearComp.addEventListener('click', async (e) => {
   const q = query(collection(db, 'items-list'), where("status", "==", "Completed"))
   const querySnapshot = await getDocs(q)
   querySnapshot.forEach(async (docs) => {
-    await deleteDoc(doc(db,'items-list',docs.id))
+    await deleteDoc(doc(db, 'items-list', docs.id))
   })
 })
